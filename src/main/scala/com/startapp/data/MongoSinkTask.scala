@@ -76,8 +76,12 @@ class MongoSinkTask extends SinkTask{
 
       for (record <- records) {
         val topic = record.topic()
-        val jsonMap = connectMongoConverter.toJsonMap(record.value()).map{v=>
-          (if(config.recordRenamerMap.containsField(v._1)) {config.recordRenamerMap(v._1)} else {v._1}, v._2)
+        val jsonMap = if (config.recordRenamerMap == null){
+          connectMongoConverter.toJsonMap(record.value())
+        }else{
+          connectMongoConverter.toJsonMap(record.value()).map{v=>
+            (if(config.recordRenamerMap.containsField(v._1)) {config.recordRenamerMap(v._1)} else {v._1}, v._2)
+          }
         }
 
         topicToRecords(topic) += MongoDBObject(jsonMap)

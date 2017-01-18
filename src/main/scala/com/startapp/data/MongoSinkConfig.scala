@@ -20,9 +20,24 @@ class MongoSinkConfig(props: java.util.Map[_,_]) extends AbstractConfig(MongoSin
 
   val topics: List[String] = getList(MongoSinkConfig.TOPICS).toList
 
-  val recordKeys: List[String] = getList(MongoSinkConfig.RECORD_KEYS).toList
-  val recordFields: List[String] = getList(MongoSinkConfig.RECORD_FIELDS).toList
-  val recordRenamerMap: Map[String,String] = getList(MongoSinkConfig.RECORD_FIELDS_RENAME).toList.map(v=>(v.split("=>")(0), v.split("=>")(1))).toMap
+  val recordKeys: List[String] = if(getList(MongoSinkConfig.RECORD_KEYS) != null) {
+      getList(MongoSinkConfig.RECORD_KEYS).toList
+    }
+    else{
+      null
+    }
+  val recordFields: List[String] = if(getList(MongoSinkConfig.RECORD_FIELDS) != null){
+      getList(MongoSinkConfig.RECORD_FIELDS).toList
+    }
+    else{
+      null
+    }
+  val recordRenamerMap: Map[String,String] = if(getList(MongoSinkConfig.RECORD_FIELDS_RENAME)!=null){
+      getList(MongoSinkConfig.RECORD_FIELDS_RENAME).toList.map(v=>(v.split("=>")(0), v.split("=>")(1))).toMap
+    }
+    else{
+      null
+    }
 
   val topicToCollection: Map[String, String] = getList(MongoSinkConfig.DB_COLLECTIONS).zipWithIndex.map(t=> (topics(t._2), t._1)).toMap
 }
