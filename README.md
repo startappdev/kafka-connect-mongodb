@@ -6,4 +6,9 @@ The connector consumes Kafka messages, rename message fields, selecting specific
 
 The Connector is available as source at Github or as binary HERE
 
-# Connector Configurations:
+#### Connector Configurations:
+| Parameter     |     Description                | 
+| ------------- |--------------------------------| 
+| col 3 is      | right-aligned                  |
+| col 2 is      | centered                       |
+| zebra stripes | are neat                       |
