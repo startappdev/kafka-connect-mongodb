@@ -28,27 +28,36 @@ In the following example we will produce json data to a Kafka Topic with out sch
 
 ##### Start Kafka
 * Start Zookeeper:
+
 	```
   	$./bin/zookeeper-server-start.sh config/zookeeper.properties
   	```
+  	
 * Start Kafka Broker:
+
 	```
    	$./bin/kafka-server-start.sh config/server.properties
    	```
+   	
 * Create a test topic:
+
     ```
    $./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic testTopic
-    ```;
+    ```
     
 ##### Start Kafka Connect worker
 * Copy the jar file of the connector to your workspace folder:
+
     ```
    $cp /your-jar-location/kafka-connect-mongodb-assembly-1.0.jar /tmp/
     ```
+    
 * Copy worker configuration file to your workspace directory:
+
     ```
    $cp config/connect-distributed.properties /tmp/
     ```
+    
 * Modify the properties file to:
     ```
     bootstrap.servers=localhost:9092
@@ -74,6 +83,7 @@ In the following example we will produce json data to a Kafka Topic with out sch
 
     Notice that if your topic has a lot of data, you may suffer from timeouts and rebalance issues because of pulling too much records at once, for handle ityou can override the maximum number of records returned by polling by putting consumer.max.partition.fetch.bytes=N in your worker configs, where N is a number that is small enough not to trigger the timeout, but large enough that you don't suffer from effectively synchronous message processing.
 * Create topics for connector offsets and configs:
+
     ```
    $./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 5 --partitions 5 --topic connectoffsets
    $./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 5 --partitions 1 --topic connectconfigs
