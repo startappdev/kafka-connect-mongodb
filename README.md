@@ -52,6 +52,12 @@ In the following example we will produce json data to a Kafka Topic with out sch
    $cp /your-jar-location/kafka-connect-mongodb-assembly-1.0.jar /tmp/
     ```
     
+* Add the jar to the classpath:
+
+    ```
+   $export CLASSPATH=/tmp/kafka-connect-mongodb-assembly-1.0.jar
+    ```
+    
 * Copy worker configuration file to your workspace directory:
 
     ```
@@ -89,3 +95,53 @@ In the following example we will produce json data to a Kafka Topic with out sch
    $./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 5 --partitions 1 --topic connectconfigs
     ```
 
+* Run the worker:
+
+    ```
+   $./bin/connect-distributed.sh /tmp/connect-distributed.properties
+    ```
+
+##### Register the mongo connector:
+* Create a json configurations file (mongo_connector_configs.json):
+
+    ```
+    {
+           "name":"mongo-connector-testTopic",
+           "config" :{
+                   "connector.class":"com.startapp.data.MongoSinkConnector",
+                   "tasks.max":"5",
+                   "db.host":"localhost",
+                   "db.port":"27017",
+                   "db.name":"testdb",
+                   "db.collections":"testcollection",
+                   "write.batch.enabled":"true",
+                   "write.batch.size":"200",
+                   "connect.use_schema":"false",
+                   "topics":"testTopic"
+           }
+    }
+    ```
+    
+* Register the connector:
+
+    ```
+   $curl -X POST -H "Content-Type: application/json" --data @/tmp/mongo_connector_configs.json http://localhost:8083/connectors
+    ```
+
+##### Check it out
+* Run Kafka producer:
+    
+    ```
+   $./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic testTopic
+    ```
+
+* Produce some data:
+
+    ```
+   {"field1":"value1", "field2":"value2", "field3":"value3"}
+    ```
+
+* Make sure the data inserted to the collection.
+
+##### Using upsert
+*
