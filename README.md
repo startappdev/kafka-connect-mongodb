@@ -24,7 +24,8 @@ The Connector is available as source at Github or as binary HERE
 In the following example we will produce json data to a Kafka Topic with out schema, and insert it to a test collection in our MongoDB database with the connector in distributed mode.
 ##### Pre start
 * Download Kafka 0.9.0.0 or later.
-* Create new database in your MongoDB named "testdb" and in that database, create new collection named "testcollection".;
+* Create new database in your MongoDB named "testdb" and in that database, create new collection named "testcollection".
+
 ##### Start Kafka
 * Start Zookeeper:
 	```
@@ -38,6 +39,7 @@ In the following example we will produce json data to a Kafka Topic with out sch
     ```
    $./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 5 --topic testTopic
     ```;
+    
 ##### Start Kafka Connect worker
 * Copy the jar file of the connector to your workspace folder:
     ```
