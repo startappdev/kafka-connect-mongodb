@@ -143,5 +143,63 @@ In the following example we will produce json data to a Kafka Topic with out sch
 
 * Make sure the data inserted to the collection.
 
-##### Using upsert
-*
+##### Using upsert, modify fields names and insert only specific fields
+* Unregister the connector:
+
+    ```
+   curl -i -X DELETE "http://localhost:8083/connectors/mongo-connector-testTopic"
+    ```
+
+* Modify connectors configurations (mongo_connector_configs.json):
+
+    ```
+    {
+           "name":"mongo-connector-testTopic",
+           "config" :{
+                   "connector.class":"com.startapp.data.MongoSinkConnector",
+                   "tasks.max":"5",
+                   "db.host":"localhost",
+                   "db.port":"27017",
+                   "db.name":"testdb",
+                   "db.collections":"testcollection",
+                   "write.batch.enabled":"true",
+                   "write.batch.size":"200",
+                   "connect.use_schema":"false",
+                   "record.fields.rename":"field1=>mykey1, "field2=>testField2",
+                   "record.keys":"myKey1",
+                   "record.fields":"myKey1,testField2,field3",
+                   "topics":"testTopic"
+           }
+    }
+    ```
+    
+* Create index on myKey1 in mongo:
+
+    ```
+   db.testcollection.createIndex( { myKey1: 1} )
+    ```
+
+* Register the connector:
+    ```
+   $curl -X POST -H "Content-Type: application/json" --data @/tmp/mongo_connector_configs.json http://localhost:8083/connectors
+    ```
+
+* Run Kafka producer:
+    
+    ```
+   $./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic testTopic
+    ```
+
+* Produce some data:
+
+    ```
+   {"field1":"a", "field2":"b", "field3":"c"}
+   {"field1":"d", "field2":"e", "field3":"f"}
+   {"field1":"a", "field2":"e", "field3":"f"}
+    ```
+
+* Make sure the data in the collection looks like this:
+    ```
+   {"myKey1":"d", "testField2":"e", "field3":"f"}
+   {"myKey1":"a", "testField2":"e", "field3":"f"}
+    ```
