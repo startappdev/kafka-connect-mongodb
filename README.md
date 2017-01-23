@@ -1,13 +1,13 @@
 # kafka-connect-mongodb
 
-The MongoDB sink connector for Kafka Connect provide a simple, continuous link from a Kafka topic or set of topics to MonogoDB collection or collections.
+The **MongoDB sink connector** for Kafka Connect provides a simple, continuous link from a Kafka topic or set of topics to MonogoDB collection or collections.
 
-The connector consumes Kafka messages, rename message fields, selecting specific fields and insert or update thous fields to the MongoDB collection.
+The connector consumes Kafka messages, renames message fields, selects specific fields and upserts them to the MongoDB collection.
 
-The Connector is available as source at Github or as binary HERE
+The connector supports messages in both JSON and Avro formats, with or without a schema, and multiple topic partitions.
 
 ### Connector Configurations:
-| Parameter              |     Description                                                              | Possible values                         |
+| Parameter              |     Description                                                              | Example                         |
 | ---------------------- |------------------------------------------------------------------------------| ----------------------------------------|
 | db.host                | host name of the database                                                    | "localhost"                             |
 | db.port                | port number of the database                                                  | "27017"                                 |
@@ -21,7 +21,8 @@ The Connector is available as source at Github or as binary HERE
 | record.fields          | specific fields from the record to insert the db                             | "field1,field2"                         |       
 
 ### Quick Start
-In the following example we will produce json data to a Kafka Topic with out schema, and insert it to a test collection in our MongoDB database with the connector in distributed mode.
+In the following example we will produce json data to a Kafka topic without schema, and insert it to a test collection in our MongoDB database with the connector in distributed mode.
+
 #### Pre start
 * Download Kafka 0.9.0.0 or later.
 * Create new database in your MongoDB named "testdb" and in that database, create new collection named "testcollection".
@@ -33,7 +34,7 @@ In the following example we will produce json data to a Kafka Topic with out sch
   	$./bin/zookeeper-server-start.sh config/zookeeper.properties
   	```
   	
-* Start Kafka Broker:
+* Start Kafka broker:
 
 	```
    	$./bin/kafka-server-start.sh config/server.properties
@@ -58,7 +59,7 @@ In the following example we will produce json data to a Kafka Topic with out sch
    $export CLASSPATH=/tmp/kafka-connect-mongodb-assembly-1.0.jar
     ```
     
-* Copy worker configuration file to your workspace directory:
+* Copy the worker configuration file to your workspace directory:
 
     ```
    $cp config/connect-distributed.properties /tmp/
@@ -87,7 +88,10 @@ In the following example we will produce json data to a Kafka Topic with out sch
     config.storage.topic=connectconfigs
     ```
 
-    Notice that if your topic has a lot of data, you may suffer from timeouts and rebalance issues because of pulling too much records at once, for handle ityou can override the maximum number of records returned by polling by putting consumer.max.partition.fetch.bytes=N in your worker configs, where N is a number that is small enough not to trigger the timeout, but large enough that you don't suffer from effectively synchronous message processing.
+	Notice that if your topic has high throughput, you may suffer from timeouts and rebalance issues, due to fetching too much records at once, which MongoDB isn't able to deal with.  
+	In order to deal with it, you can set the maximum number of fetched records by setting the `consumer.max.partition.fetch.bytes` parameter in your worker configs, where the parameter's value is a number that is low enough not to trigger the timeout, but high enough for not suffering from effectively synchronous message processing.  
+	Tuning will be required in that case.
+
 * Create topics for connector offsets and configs:
 
     ```
@@ -101,7 +105,7 @@ In the following example we will produce json data to a Kafka Topic with out sch
    $./bin/connect-distributed.sh /tmp/connect-distributed.properties
     ```
 
-#### Register the mongo connector:
+#### Register the MongoDB connector:
 * Create a json configurations file (mongo_connector_configs.json):
 
     ```
@@ -143,7 +147,7 @@ In the following example we will produce json data to a Kafka Topic with out sch
 
 * Make sure the data inserted to the collection.
 
-#### Using upsert, modify fields names and insert only specific fields
+#### Using upsert, modifying field names and inserting only specific fields
 * Unregister the connector:
 
     ```
