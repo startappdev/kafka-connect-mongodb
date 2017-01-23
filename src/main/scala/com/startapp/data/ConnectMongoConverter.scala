@@ -8,13 +8,19 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 import scala.collection.JavaConversions._
 
-/**
-  * Created by Raz on 10/01/2017.
-  */
+
 trait ConnectMongoConverter {
+  /**
+    * Converts connect data to json tuples.
+    *
+    * @return converted data
+    */
   def toJsonMap(value: Object): List[(String, Object)]
 }
 
+/**
+  * Converter of connect data with schema to json tuples.
+  */
 object SchemaConnectMongoConverter extends ConnectMongoConverter {
   override def toJsonMap(value: Object): List[(String, Object)] = {
     val struct = value.asInstanceOf[Struct]
@@ -41,6 +47,9 @@ object SchemaConnectMongoConverter extends ConnectMongoConverter {
   }
 }
 
+/**
+  * Converter of connect data without schema to json tuples.
+  */
 object NoSchemaConnectMongoConverter extends ConnectMongoConverter {
   override def toJsonMap(value: Object): List[(String, Object)] = {
     value.asInstanceOf[util.HashMap[String,Object]].toList

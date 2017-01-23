@@ -6,8 +6,9 @@ import com.startapp.data.validators.RenameListValidator
 import org.apache.kafka.common.config.{AbstractConfig, ConfigDef, ConfigException}
 
 import scala.collection.JavaConversions._
+
 /**
-  * Created by Raz on 11/01/2017.
+  * MongoSinkConfig defines the configurations with validations of the connector
   */
 class MongoSinkConfig(props: java.util.Map[_,_]) extends AbstractConfig(MongoSinkConfig.configDef, props) {
   val hostName: String = getString(MongoSinkConfig.DB_HOST)

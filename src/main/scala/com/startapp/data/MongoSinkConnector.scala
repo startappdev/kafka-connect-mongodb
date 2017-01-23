@@ -6,7 +6,9 @@ import org.apache.kafka.connect.connector.Task
 import org.apache.kafka.connect.sink.SinkConnector
 
 /**
-  * Created by Raz on 05/01/2017.
+  * MongoSinkConnector is a Kafka Connect Sink connector that
+  * consumes topic messages and stores them in a MongoDB collection.
+  * For more information, check: https://github.com/startappdev/kafka-connect-mongodb
   */
 class MongoSinkConnector extends SinkConnector {
   private var taskConfigs: util.Map[String, String] = _

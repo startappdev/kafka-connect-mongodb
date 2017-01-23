@@ -12,7 +12,9 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
 
 /**
-  * Created by Raz on 05/01/2017.
+  * MongoSinkTask is a Kafka Connect Sink Task for the MongoSinkConnector.
+  * It is responsible for inserting Kafka messages into a mongo db collection.
+  * For more information, check: https://github.com/startappdev/kafka-connect-mongodb
   */
 class MongoSinkTask extends SinkTask{
   private var mongoConnection : MongoConnection = _
@@ -22,6 +24,10 @@ class MongoSinkTask extends SinkTask{
   private var config: MongoSinkConfig = _
   //private var totalRecords = 0
 
+  /**
+    * Start the task.
+    * Responsible for establishment with MongoDb and initialize necessary information by the connector configurations.
+    */
   override def start(props: util.Map[String, String]): Unit = {
     config = MongoSinkConfig(props)
     mongoConnection = MongoConnection(config.hostName,config.portNum)
@@ -37,6 +43,9 @@ class MongoSinkTask extends SinkTask{
     }
   }
 
+  /**
+    * Writes topic data into the collection
+    */
   private def writeTopic(topic : String): Unit = {
     if(topicToRecords(topic).nonEmpty){
       val bulk = collections(topic).initializeUnorderedBulkOperation

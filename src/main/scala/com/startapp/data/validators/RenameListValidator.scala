@@ -6,7 +6,8 @@ import org.apache.kafka.common.config.ConfigException
 import scala.collection.JavaConversions._
 
 /**
-  * Created by Raz on 17/01/2017.
+  * Validates connector's renamer config.
+  * each item in the list must be formatted in this pattern: "originalValue=>newValue"
   */
 object RenameListValidator extends Validator{
   override def ensureValid(name: String, o: scala.Any): Unit = {
