@@ -3,7 +3,7 @@ package com.startapp.data
 import java.util
 
 import com.startapp.data.validators.RenameListValidator
-import org.apache.kafka.common.config.{AbstractConfig, ConfigDef}
+import org.apache.kafka.common.config.{AbstractConfig, ConfigDef, ConfigException}
 
 import scala.collection.JavaConversions._
 /**
@@ -39,7 +39,12 @@ class MongoSinkConfig(props: java.util.Map[_,_]) extends AbstractConfig(MongoSin
       null
     }
 
-  val topicToCollection: Map[String, String] = getList(MongoSinkConfig.DB_COLLECTIONS).zipWithIndex.map(t=> (topics(t._2), t._1)).toMap
+  val topicToCollection: Map[String, String] = try {
+      getList(MongoSinkConfig.DB_COLLECTIONS).zipWithIndex.map(t=> (topics(t._2), t._1)).toMap
+    }
+    catch {
+      case e: IndexOutOfBoundsException => throw new ConfigException(e.getMessage)
+    }
 }
 
 object MongoSinkConfig {
@@ -97,6 +102,6 @@ object MongoSinkConfig {
     .define(USE_SCHEMA,ConfigDef.Type.BOOLEAN, USE_SCHEMA_DEFAULT,ConfigDef.Importance.HIGH, USE_SCHEMA_DOC)
     .define(RECORD_KEYS, ConfigDef.Type.LIST,RECORD_KEYS_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_KEYS_DOC)
     .define(RECORD_FIELDS, ConfigDef.Type.LIST,RECORD_FIELDS_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_FIELDS_DOC)
-    .define(RECORD_FIELDS_RENAME, ConfigDef.Type.LIST,RECORD_FIELDS_RENAME_DEFAULT, RenameListValidator.apply,ConfigDef.Importance.LOW, RECORD_FIELDS_RENAME_DOC)
+    .define(RECORD_FIELDS_RENAME, ConfigDef.Type.LIST,RECORD_FIELDS_RENAME_DEFAULT, RenameListValidator,ConfigDef.Importance.LOW, RECORD_FIELDS_RENAME_DOC)
     .define(TOPICS, ConfigDef.Type.LIST,ConfigDef.Importance.HIGH, TOPICS_DOC)
 }

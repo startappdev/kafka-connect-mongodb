@@ -2,6 +2,7 @@ package com.startapp.data
 
 import java.util
 
+import com.mongodb.casbah.BulkWriteOperation
 import com.mongodb.casbah.Imports._
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
@@ -38,8 +39,6 @@ class MongoSinkTask extends SinkTask{
 
   private def writeTopic(topic : String): Unit = {
     if(topicToRecords(topic).nonEmpty){
-      //val t0 = Calendar.getInstance().getTimeInMillis
-
       val bulk = collections(topic).initializeUnorderedBulkOperation
 
       topicToRecords(topic).foreach{dbObj =>
@@ -59,14 +58,17 @@ class MongoSinkTask extends SinkTask{
         }
       }
 
-      //val t1 = Calendar.getInstance().getTimeInMillis
-      bulk.execute(WriteConcern.Unacknowledged)
-      //val t2 = Calendar.getInstance().getTimeInMillis
-
-      //println(s"delta time until execute: ${t1-t0}. delta time for execute: ${t2-t1}. delta time for all: ${t2-t0}. records size: ${topicToRecords(topic).length}")
+      executeBulkOperation(bulk)
 
       topicToRecords(topic).clear()
     }
+  }
+
+  def executeBulkOperation(bulk : BulkWriteOperation): Unit ={
+    //val t0 = Calendar.getInstance().getTimeInMillis
+    bulk.execute(WriteConcern.Unacknowledged)
+    //val t1 = Calendar.getInstance().getTimeInMillis
+    //println(s"delta time for execute: ${t1-t0}.")
   }
 
   override def put(records: util.Collection[SinkRecord]): Unit = {

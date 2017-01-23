@@ -8,7 +8,7 @@ import scala.collection.JavaConversions._
 /**
   * Created by Raz on 17/01/2017.
   */
-class RenameListValidator extends Validator{
+object RenameListValidator extends Validator{
   override def ensureValid(name: String, o: scala.Any): Unit = {
     if(o != null){
       val l = o.asInstanceOf[java.util.List[String]].toList
@@ -21,6 +21,6 @@ class RenameListValidator extends Validator{
   }
 }
 
-object RenameListValidator {
-  def apply: RenameListValidator = new RenameListValidator()
-}
+//object RenameListValidator {
+//  def apply: RenameListValidator = new RenameListValidator()
+//}
