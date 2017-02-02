@@ -40,6 +40,8 @@ class MongoSinkConfig(props: java.util.Map[_,_]) extends AbstractConfig(MongoSin
       null
     }
 
+  val insertionTsName : String = getString(MongoSinkConfig.RECORD_INSERTION_TIME_NAME)
+
   val topicToCollection: Map[String, String] = try {
       getList(MongoSinkConfig.DB_COLLECTIONS).zipWithIndex.map(t=> (topics(t._2), t._1)).toMap
     }
@@ -90,6 +92,10 @@ object MongoSinkConfig {
   val RECORD_FIELDS_RENAME_DEFAULT = null
   val RECORD_FIELDS_RENAME_DOC = "rename fields key by map. pattern: A=>B,C=>D,...,Y=>Z"
 
+  val RECORD_INSERTION_TIME_NAME = "record.timestamp.name"
+  val RECORD_INSERTION_TIME_NAME_DEFAULT = null
+  val RECORD_INSERTION_TIME_NAME_DOC = "add a field of the insertion time to the collection, if record.timestamp.name is null the field will not be in the record"
+
   val TOPICS = "topics"
   val TOPICS_DOC = "topics doc"
 
@@ -104,5 +110,6 @@ object MongoSinkConfig {
     .define(RECORD_KEYS, ConfigDef.Type.LIST,RECORD_KEYS_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_KEYS_DOC)
     .define(RECORD_FIELDS, ConfigDef.Type.LIST,RECORD_FIELDS_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_FIELDS_DOC)
     .define(RECORD_FIELDS_RENAME, ConfigDef.Type.LIST,RECORD_FIELDS_RENAME_DEFAULT, RenameListValidator,ConfigDef.Importance.LOW, RECORD_FIELDS_RENAME_DOC)
+    .define(RECORD_INSERTION_TIME_NAME, ConfigDef.Type.STRING, RECORD_INSERTION_TIME_NAME_DEFAULT, ConfigDef.Importance.MEDIUM, RECORD_INSERTION_TIME_NAME_DOC)
     .define(TOPICS, ConfigDef.Type.LIST,ConfigDef.Importance.HIGH, TOPICS_DOC)
 }

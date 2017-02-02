@@ -95,7 +95,13 @@ class MongoSinkTask extends SinkTask{
           }
         }
 
-        topicToRecords(topic) += MongoDBObject(jsonMap)
+        val dbObj = MongoDBObject(jsonMap)
+        if(config.insertionTsName != null){
+          val timestamp = new java.lang.Long(System.currentTimeMillis())
+          dbObj.put(config.insertionTsName, timestamp)
+        }
+
+        topicToRecords(topic) += dbObj
 
         if(config.useBatches){
 

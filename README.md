@@ -7,7 +7,7 @@ The connector consumes Kafka messages, renames message fields, selects specific 
 The connector supports messages in both JSON and Avro formats, with or without a schema, and multiple topic partitions.
 
 ### Connector Configurations:
-| Parameter              |     Description                                                              | Example                         |
+| Parameter              |     Description                                                              | Example                                 |
 | ---------------------- |------------------------------------------------------------------------------| ----------------------------------------|
 | db.host                | host name of the database                                                    | "localhost"                             |
 | db.port                | port number of the database                                                  | "27017"                                 |
@@ -19,6 +19,7 @@ The connector supports messages in both JSON and Avro formats, with or without a
 | record.fields.rename   | rename fields name from the data in the topic                                | "field1=>newField1, field2=>newField2"  |               
 | record.keys            | keys in the db to update by                                                  | "key1,key2"                             |   
 | record.fields          | specific fields from the record to insert the db                             | "field1,field2"                         |       
+| record.timestamp.name  | specific fields from the record to insert the db                             | "updateDate"                         |       
 
 ### Quick Start
 In the following example we will produce json data to a Kafka topic without schema, and insert it to a test collection in our MongoDB database with the connector in distributed mode.
@@ -206,4 +207,27 @@ In the following example we will produce json data to a Kafka topic without sche
     ```
    {"myKey1":"d", "testField2":"e", "field3":"f"}
    {"myKey1":"a", "testField2":"e", "field3":"f"}
+    ```
+
+#### Add InsertedTime field to the record in the DB
+* Unregister the connector
+
+* Modify connectors configurations (mongo_connector_configs.json) by adding "record.timestamp.name":"updateDate" to the configs
+    
+* Register the connector:
+
+* Run Kafka producer:
+
+* Produce some data:
+
+    ```
+   {"field1":"a", "field2":"b", "field3":"c"}
+   {"field1":"d", "field2":"e", "field3":"f"}
+   {"field1":"a", "field2":"e", "field3":"f"}
+    ```
+
+* Make sure the data in the collection looks like this:
+    ```
+   {"myKey1":"d", "testField2":"e", "field3":"f", "updateDate" : 1485788932525}
+   {"myKey1":"a", "testField2":"e", "field3":"f", "updateDate" : 1485789932528}
     ```
