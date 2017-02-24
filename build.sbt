@@ -5,8 +5,8 @@ version := "1.0"
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  "org.apache.kafka" % "connect-json" % "0.9.0.0" % "provided",
-  "org.apache.kafka" % "connect-api" % "0.9.0.0" % "provided",
+  "org.apache.kafka" % "connect-json" % "0.10.1.1" % "provided",
+  "org.apache.kafka" % "connect-api" % "0.10.1.1" % "provided",
   "org.mongodb" %% "casbah-core" % "3.1.1",
   "org.scalactic" %% "scalactic" % "3.0.1",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",

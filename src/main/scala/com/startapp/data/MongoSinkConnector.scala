@@ -2,6 +2,7 @@ package com.startapp.data
 
 import java.util
 
+import org.apache.kafka.common.config.ConfigDef
 import org.apache.kafka.connect.connector.Task
 import org.apache.kafka.connect.sink.SinkConnector
 
@@ -26,5 +27,7 @@ class MongoSinkConnector extends SinkConnector {
   }
 
   override def version(): String = getClass.getPackage.getImplementationVersion
+
+  override def config(): ConfigDef = MongoSinkConfig.configDef
 
 }
