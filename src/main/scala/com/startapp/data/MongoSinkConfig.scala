@@ -44,7 +44,11 @@ class MongoSinkConfig(props: java.util.Map[_,_]) extends AbstractConfig(MongoSin
   val insertionTsName : String = getString(MongoSinkConfig.RECORD_INSERTION_TIME_NAME)
 
   val filterKey : String = getString(MongoSinkConfig.RECORD_FILTER_KEY)
-  val filterRegex: Regex =  getString(MongoSinkConfig.RECORD_FILTER_REGEX).r
+  val filterRegex: Regex =  if (getString(MongoSinkConfig.RECORD_FILTER_REGEX) == null) {
+    null
+  }else {
+    getString(MongoSinkConfig.RECORD_FILTER_REGEX).r
+  }
 
   val topicToCollection: Map[String, String] = try {
       getList(MongoSinkConfig.DB_COLLECTIONS).zipWithIndex.map(t=> (topics(t._2), t._1)).toMap
