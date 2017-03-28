@@ -86,6 +86,8 @@ class MongoSinkTask extends SinkTask{
       //println(s"RECORD SIZE: ${records.size()} TOTAL RECORDS: $totalRecords")
 
       for (record <- records) {
+        var insertRecord = true
+
         val topic = record.topic()
         val jsonMap = if (config.recordRenamerMap == null){
           connectMongoConverter.toJsonMap(record.value())
@@ -95,13 +97,21 @@ class MongoSinkTask extends SinkTask{
           }
         }
 
-        val dbObj = MongoDBObject(jsonMap)
-        if(config.insertionTsName != null){
-          val timestamp = new java.lang.Long(System.currentTimeMillis())
-          dbObj.put(config.insertionTsName, timestamp)
+        if(config.filterKey != null && config.filterRegex != null){
+          val filterKV = jsonMap.filter(_._1 == config.filterKey)
+          if(filterKV.nonEmpty && config.filterRegex.pattern.matcher(filterKV.head._2.toString).matches)
+            insertRecord = false
         }
 
-        topicToRecords(topic) += dbObj
+        if(insertRecord){
+          val dbObj = MongoDBObject(jsonMap)
+          if(config.insertionTsName != null){
+            val timestamp = new java.lang.Long(System.currentTimeMillis())
+            dbObj.put(config.insertionTsName, timestamp)
+          }
+
+          topicToRecords(topic) += dbObj
+        }
 
         if(config.useBatches){
 

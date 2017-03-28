@@ -6,6 +6,7 @@ import com.startapp.data.validators.RenameListValidator
 import org.apache.kafka.common.config.{AbstractConfig, ConfigDef, ConfigException}
 
 import scala.collection.JavaConversions._
+import scala.util.matching.Regex
 
 /**
   * MongoSinkConfig defines the configurations with validations of the connector
@@ -41,6 +42,9 @@ class MongoSinkConfig(props: java.util.Map[_,_]) extends AbstractConfig(MongoSin
     }
 
   val insertionTsName : String = getString(MongoSinkConfig.RECORD_INSERTION_TIME_NAME)
+
+  val filterKey : String = getString(MongoSinkConfig.RECORD_FILTER_KEY)
+  val filterRegex: Regex =  getString(MongoSinkConfig.RECORD_FILTER_REGEX).r
 
   val topicToCollection: Map[String, String] = try {
       getList(MongoSinkConfig.DB_COLLECTIONS).zipWithIndex.map(t=> (topics(t._2), t._1)).toMap
@@ -96,6 +100,14 @@ object MongoSinkConfig {
   val RECORD_INSERTION_TIME_NAME_DEFAULT = null
   val RECORD_INSERTION_TIME_NAME_DOC = "add a field of the insertion time to the collection, if record.timestamp.name is null the field will not be in the record"
 
+  val RECORD_FILTER_KEY = "record.filter.key"
+  val RECORD_FILTER_KEY_DEFAULT = null
+  val RECORD_FILTER_KEY_DOC = "filter records by this key"
+
+  val RECORD_FILTER_REGEX = "record.filter.regex"
+  val RECORD_FILTER_REGEX_DEFAULT = null
+  val RECORD_FILTER_REGEX_DOC = "filter records using this regex"
+
   val TOPICS = "topics"
   val TOPICS_DOC = "topics doc"
 
@@ -111,5 +123,7 @@ object MongoSinkConfig {
     .define(RECORD_FIELDS, ConfigDef.Type.LIST,RECORD_FIELDS_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_FIELDS_DOC)
     .define(RECORD_FIELDS_RENAME, ConfigDef.Type.LIST,RECORD_FIELDS_RENAME_DEFAULT, RenameListValidator,ConfigDef.Importance.LOW, RECORD_FIELDS_RENAME_DOC)
     .define(RECORD_INSERTION_TIME_NAME, ConfigDef.Type.STRING, RECORD_INSERTION_TIME_NAME_DEFAULT, ConfigDef.Importance.MEDIUM, RECORD_INSERTION_TIME_NAME_DOC)
+    .define(RECORD_FILTER_KEY, ConfigDef.Type.STRING, RECORD_FILTER_KEY_DEFAULT, ConfigDef.Importance.LOW, RECORD_FILTER_KEY_DOC)
+    .define(RECORD_FILTER_REGEX, ConfigDef.Type.STRING, RECORD_FILTER_REGEX_DEFAULT, ConfigDef.Importance.LOW, RECORD_FILTER_REGEX_DOC)
     .define(TOPICS, ConfigDef.Type.LIST,ConfigDef.Importance.HIGH, TOPICS_DOC)
 }
