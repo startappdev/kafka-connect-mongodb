@@ -1,6 +1,8 @@
+organization := "com.startapp.data"
+
 name := "kafka-connect-mongodb"
 
-version := "1.0"
+version := "1.0.4"
 
 scalaVersion := "2.11.7"
 
