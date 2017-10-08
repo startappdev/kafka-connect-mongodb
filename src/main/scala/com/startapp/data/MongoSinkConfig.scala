@@ -28,6 +28,13 @@ class MongoSinkConfig(props: java.util.Map[_,_]) extends AbstractConfig(MongoSin
     else{
       null
     }
+  val incremetFields: List[String] = if(getList(MongoSinkConfig.RECORD_INCREMENT) != null){
+    getList(MongoSinkConfig.RECORD_INCREMENT).toList
+  }
+  else{
+    null
+  }
+
   val recordFields: List[String] = if(getList(MongoSinkConfig.RECORD_FIELDS) != null){
       getList(MongoSinkConfig.RECORD_FIELDS).toList
     }
@@ -92,6 +99,10 @@ object MongoSinkConfig {
   val RECORD_KEYS_DEFAULT = null
   val RECORD_KEYS_DOC = "key of the record in the db. to find the row in the db for update"
 
+  val RECORD_INCREMENT = "record.increment.fields"
+  val RECORD_INCREMENT_DEFAULT = null
+  val RECORD_INCREMENT_DOC = "fields of each record in the collection to insert and increment"
+
   val RECORD_FIELDS = "record.fields"
   val RECORD_FIELDS_DEFAULT = null
   val RECORD_FIELDS_DOC = "fields of each record in the collection"
@@ -124,6 +135,7 @@ object MongoSinkConfig {
     .define(WRITE_BATCH_SIZE, ConfigDef.Type.INT,WRITE_BATCH_SIZE_DEFAULT, ConfigDef.Range.atLeast(1), ConfigDef.Importance.MEDIUM, WRITE_BATCH_SIZE_DOC)
     .define(USE_SCHEMA,ConfigDef.Type.BOOLEAN, USE_SCHEMA_DEFAULT,ConfigDef.Importance.HIGH, USE_SCHEMA_DOC)
     .define(RECORD_KEYS, ConfigDef.Type.LIST,RECORD_KEYS_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_KEYS_DOC)
+    .define(RECORD_INCREMENT, ConfigDef.Type.LIST,RECORD_INCREMENT_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_INCREMENT_DOC)
     .define(RECORD_FIELDS, ConfigDef.Type.LIST,RECORD_FIELDS_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_FIELDS_DOC)
     .define(RECORD_FIELDS_RENAME, ConfigDef.Type.LIST,RECORD_FIELDS_RENAME_DEFAULT, RenameListValidator,ConfigDef.Importance.LOW, RECORD_FIELDS_RENAME_DOC)
     .define(RECORD_INSERTION_TIME_NAME, ConfigDef.Type.STRING, RECORD_INSERTION_TIME_NAME_DEFAULT, ConfigDef.Importance.MEDIUM, RECORD_INSERTION_TIME_NAME_DOC)
