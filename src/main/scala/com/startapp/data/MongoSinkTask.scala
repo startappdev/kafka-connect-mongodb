@@ -51,10 +51,6 @@ class MongoSinkTask extends SinkTask{
       val bulk = collections(topic).initializeUnorderedBulkOperation
 
       topicToRecords(topic).foreach{dbObj =>
-        if(config.recordKeys != null && config.incremetFields != null){
-          bulk.find(dbObj.filter(field=>config.recordKeys.contains(field._1)))
-            .upsert().update($inc(dbObj.filter(field=>config.incremetFields.contains(field._1)).toList : _*))
-        }
         else if(config.recordKeys != null && config.recordFields != null){
           bulk.find(dbObj.filter(field=>config.recordKeys.contains(field._1)))
             .upsert().update($set(dbObj.filter(field=>config.recordFields.contains(field._1)).toList : _*))
