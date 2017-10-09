@@ -2,7 +2,7 @@ package com.startapp.data
 
 import java.util
 
-import com.mongodb.casbah.BulkWriteOperation
+import com.mongodb.casbah.{BulkWriteOperation, query}
 import com.mongodb.casbah.Imports._
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
 import org.apache.kafka.common.TopicPartition
@@ -49,11 +49,10 @@ class MongoSinkTask extends SinkTask{
   private def writeTopic(topic : String): Unit = {
     if(topicToRecords(topic).nonEmpty){
       val bulk = collections(topic).initializeUnorderedBulkOperation
-
       topicToRecords(topic).foreach{dbObj =>
         if(config.recordKeys != null && config.incremetFields != null){
           bulk.find(dbObj.filter(field=>config.recordKeys.contains(field._1)))
-            .upsert().update($inc(dbObj.filter(field=>config.incremetFields.contains(field._1)).toList : _*))
+            .upsert().update($inc(dbObj.filter(field=>config.incremetFields.contains(field._1)).toList.map(kv => (kv._1, kv._2.asInstanceOf[Int])) : _*))
         }
         else if(config.recordKeys != null && config.recordFields != null){
           bulk.find(dbObj.filter(field=>config.recordKeys.contains(field._1)))

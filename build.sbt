@@ -1,6 +1,8 @@
+organization := "com.startapp.data"
+
 name := "kafka-connect-mongodb"
 
-version := "1.0"
+version := "1.0.3"
 
 scalaVersion := "2.11.7"
 
@@ -20,4 +22,3 @@ resolvers ++= Seq(
 )
 
 testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/scalatest-reports")
-
