@@ -2,7 +2,7 @@
 
 * You can use this connector for Kafka9 by using kafka9-connect-mongodb branch.
 
-The **MongoDB sink connector** for Kafka Connect provides a simple, continuous link from a Kafka topic or set of topics to MonogoDB collection or collections.
+The **MongoDB sink connector** for Kafka Connect provides a simple, continuous link from a Kafka topic or set of topics to MongoDB collection or collections.
 
 The connector consumes Kafka messages, renames message fields, selects specific fields and upserts them to the MongoDB collection.
 
