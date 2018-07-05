@@ -17,7 +17,6 @@ import scala.collection.JavaConversions._
   * For more information, check: https://github.com/startappdev/kafka-connect-mongodb
   */
 class MongoSinkTask extends SinkTask{
-  private var mongoConnection : MongoConnection = _
   private var collections : Map[String,MongoCollection] = _
   private var topicToRecords : Map[String, ListBuffer[MongoDBObject]] = _
   private var connectMongoConverter : ConnectMongoConverter = _
@@ -30,9 +29,16 @@ class MongoSinkTask extends SinkTask{
     */
   override def start(props: util.Map[String, String]): Unit = {
     config = MongoSinkConfig(props)
-    mongoConnection = MongoConnection(config.hostName,config.portNum)
 
-    collections = config.topicToCollection.map(t=> (t._1, mongoConnection(config.dbName)(t._2)))
+    val server = new ServerAddress(config.hostName, config.portNum)
+    val mongoClient = if(config.dbAuth == null){
+      MongoClient(server)
+    } else {
+      val credentials = MongoCredential.createCredential(config.dbAuth.username, config.dbAuth.source, config.dbAuth.password.toCharArray)
+      MongoClient(server, List(credentials))
+    }
+
+    collections = config.topicToCollection.map(t=> (t._1, mongoClient(config.dbName)(t._2)))
     topicToRecords = config.topics.map((_, ListBuffer.empty[MongoDBObject])).toMap
 
     connectMongoConverter = if(config.useSchema) {
@@ -52,7 +58,7 @@ class MongoSinkTask extends SinkTask{
       topicToRecords(topic).foreach{dbObj =>
         if(config.recordKeys != null && config.incremetFields != null){
           bulk.find(dbObj.filter(field=>config.recordKeys.contains(field._1)))
-            .upsert().update($inc(dbObj.filter(field=>config.incremetFields.contains(field._1)).toList.map(kv => (kv._1, kv._2.asInstanceOf[Int])) : _*))
+            .upsert().update($inc(dbObj.filter(field=>config.incremetFields.contains(field._1)).toList.map{kv => (kv._1, kv._2.asInstanceOf[Double])} : _*))
         }
         else if(config.recordKeys != null && config.recordFields != null){
           bulk.find(dbObj.filter(field=>config.recordKeys.contains(field._1)))
@@ -78,7 +84,11 @@ class MongoSinkTask extends SinkTask{
 
   def executeBulkOperation(bulk : BulkWriteOperation): Unit ={
     //val t0 = Calendar.getInstance().getTimeInMillis
-    bulk.execute(WriteConcern.Unacknowledged)
+    if(config.useMongoAck){
+      bulk.execute(WriteConcern.Acknowledged)
+    } else {
+      bulk.execute(WriteConcern.Unacknowledged)
+    }
     //val t1 = Calendar.getInstance().getTimeInMillis
     //println(s"delta time for execute: ${t1-t0}.")
   }

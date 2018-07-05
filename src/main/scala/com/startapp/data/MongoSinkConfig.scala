@@ -8,6 +8,20 @@ import org.apache.kafka.common.config.{AbstractConfig, ConfigDef, ConfigExceptio
 import scala.collection.JavaConversions._
 import scala.util.matching.Regex
 
+case class MongoAuthInfo(username: String, password: String, source: String)
+
+object MongoAuthInfo {
+  def apply(authStr: String): MongoAuthInfo = {
+    val splitedAuth = authStr.split(";")
+
+    if(splitedAuth.length != 3){
+      throw new ConfigException(s"Bad auth string: $authStr")
+    }
+
+    MongoAuthInfo(splitedAuth(0),splitedAuth(1),splitedAuth(2))
+  }
+}
+
 /**
   * MongoSinkConfig defines the configurations with validations of the connector
   */
@@ -15,10 +29,16 @@ class MongoSinkConfig(props: java.util.Map[_,_]) extends AbstractConfig(MongoSin
   val hostName: String = getString(MongoSinkConfig.DB_HOST)
   val portNum: Integer = getInt(MongoSinkConfig.DB_PORT)
   val dbName: String = getString(MongoSinkConfig.DB_NAME)
+  val dbAuth: MongoAuthInfo = if(getString(MongoSinkConfig.MONGO_AUTHENTICATION) == null) {
+    null
+  } else {
+    MongoAuthInfo(getString(MongoSinkConfig.MONGO_AUTHENTICATION))
+  }
 
   val useBatches: Boolean = getBoolean(MongoSinkConfig.WRITE_BATCH_ENABLED)
   val batchSize : Integer = getInt(MongoSinkConfig.WRITE_BATCH_SIZE)
   val useSchema: Boolean = getBoolean(MongoSinkConfig.USE_SCHEMA)
+  val useMongoAck: Boolean = getBoolean(MongoSinkConfig.USE_MONGO_ACK)
 
   val topics: List[String] = getList(MongoSinkConfig.TOPICS).toList
 
@@ -76,6 +96,10 @@ object MongoSinkConfig {
   val DB_PORT_DEFAULT = 27017
   val DB_PORT_DOC = "The DB port number"
 
+  val MONGO_AUTHENTICATION = "db.authentication"
+  val MONGO_AUTHENTICATION_DEFAULT: String = null
+  val MONGO_AUTHENTICATION_DOC = "add authentication to mongo username;password;source"
+
   val DB_NAME = "db.name"
   val DB_NAME_DEFAULT = ""
   val DB_NAME_DOC = "The Mongo Database name"
@@ -90,6 +114,10 @@ object MongoSinkConfig {
   val WRITE_BATCH_SIZE = "write.batch.size"
   val WRITE_BATCH_SIZE_DEFAULT: Int = 200
   val WRITE_BATCH_SIZE_DOC = "Max records batch size for writing."
+
+  val USE_MONGO_ACK = "db.use_ack"
+  val USE_MONGO_ACK_DEFAULT = false
+  val USE_MONGO_ACK_DOC = "Use ack when writing data to Mongo (true/false)"
 
   val USE_SCHEMA = "connect.use_schema"
   val USE_SCHEMA_DEFAULT = true
@@ -129,11 +157,13 @@ object MongoSinkConfig {
   val configDef: ConfigDef = new ConfigDef()
     .define(DB_HOST,ConfigDef.Type.STRING,DB_HOST_DEFAULT,ConfigDef.Importance.MEDIUM, DB_HOST_DOC)
     .define(DB_PORT, ConfigDef.Type.INT,DB_PORT_DEFAULT, ConfigDef.Range.between(0,65535), ConfigDef.Importance.LOW, DB_HOST_DOC)
+    .define(MONGO_AUTHENTICATION, ConfigDef.Type.STRING,MONGO_AUTHENTICATION_DEFAULT, ConfigDef.Importance.MEDIUM,MONGO_AUTHENTICATION_DOC)
     .define(DB_NAME, ConfigDef.Type.STRING,DB_NAME_DEFAULT, ConfigDef.Importance.HIGH,DB_NAME_DOC)
     .define(DB_COLLECTIONS, ConfigDef.Type.LIST,ConfigDef.Importance.HIGH, DB_COLLECTIONS)
     .define(WRITE_BATCH_ENABLED,ConfigDef.Type.BOOLEAN, WRITE_BATCH_ENABLED_DEFAULT,ConfigDef.Importance.MEDIUM, WRITE_BATCH_ENABLED_DOC)
     .define(WRITE_BATCH_SIZE, ConfigDef.Type.INT,WRITE_BATCH_SIZE_DEFAULT, ConfigDef.Range.atLeast(1), ConfigDef.Importance.MEDIUM, WRITE_BATCH_SIZE_DOC)
     .define(USE_SCHEMA,ConfigDef.Type.BOOLEAN, USE_SCHEMA_DEFAULT,ConfigDef.Importance.HIGH, USE_SCHEMA_DOC)
+    .define(USE_MONGO_ACK,ConfigDef.Type.BOOLEAN, USE_MONGO_ACK_DEFAULT,ConfigDef.Importance.HIGH, USE_MONGO_ACK_DOC)
     .define(RECORD_KEYS, ConfigDef.Type.LIST,RECORD_KEYS_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_KEYS_DOC)
     .define(RECORD_INCREMENT, ConfigDef.Type.LIST,RECORD_INCREMENT_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_INCREMENT_DOC)
     .define(RECORD_FIELDS, ConfigDef.Type.LIST,RECORD_FIELDS_DEFAULT,ConfigDef.Importance.MEDIUM, RECORD_FIELDS_DOC)
