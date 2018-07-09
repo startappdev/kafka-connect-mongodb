@@ -29,11 +29,13 @@ class MongoSinkConfig(props: java.util.Map[_,_]) extends AbstractConfig(MongoSin
   val hostName: String = getString(MongoSinkConfig.DB_HOST)
   val portNum: Integer = getInt(MongoSinkConfig.DB_PORT)
   val dbName: String = getString(MongoSinkConfig.DB_NAME)
-  val dbAuth: MongoAuthInfo = if(getString(MongoSinkConfig.MONGO_AUTHENTICATION) == null) {
+
+  val dbAuth: MongoAuthInfo = if(getString(MongoSinkConfig.DB_AUTHENTICATION) == null) {
     null
   } else {
-    MongoAuthInfo(getString(MongoSinkConfig.MONGO_AUTHENTICATION))
+    MongoAuthInfo(getString(MongoSinkConfig.DB_AUTHENTICATION))
   }
+  val dbAuthUseSsl: Boolean = getBoolean(MongoSinkConfig.DB_AUTHENTICATION_USE_SSL)
 
   val useBatches: Boolean = getBoolean(MongoSinkConfig.WRITE_BATCH_ENABLED)
   val batchSize : Integer = getInt(MongoSinkConfig.WRITE_BATCH_SIZE)
@@ -96,9 +98,13 @@ object MongoSinkConfig {
   val DB_PORT_DEFAULT = 27017
   val DB_PORT_DOC = "The DB port number"
 
-  val MONGO_AUTHENTICATION = "db.authentication"
-  val MONGO_AUTHENTICATION_DEFAULT: String = null
-  val MONGO_AUTHENTICATION_DOC = "add authentication to mongo username;password;source"
+  val DB_AUTHENTICATION = "db.authentication"
+  val DB_AUTHENTICATION_DEFAULT: String = null
+  val DB_AUTHENTICATION_DOC = "add authentication to mongo username;password;source"
+
+  val DB_AUTHENTICATION_USE_SSL = "db.authentication.use.ssl"
+  val DB_AUTHENTICATION_USE_SSL_DEFAULT: Boolean = false
+  val DB_AUTHENTICATION_USE_SSL_DOC = "use ssl to connect mongo"
 
   val DB_NAME = "db.name"
   val DB_NAME_DEFAULT = ""
@@ -157,7 +163,8 @@ object MongoSinkConfig {
   val configDef: ConfigDef = new ConfigDef()
     .define(DB_HOST,ConfigDef.Type.STRING,DB_HOST_DEFAULT,ConfigDef.Importance.MEDIUM, DB_HOST_DOC)
     .define(DB_PORT, ConfigDef.Type.INT,DB_PORT_DEFAULT, ConfigDef.Range.between(0,65535), ConfigDef.Importance.LOW, DB_HOST_DOC)
-    .define(MONGO_AUTHENTICATION, ConfigDef.Type.STRING,MONGO_AUTHENTICATION_DEFAULT, ConfigDef.Importance.MEDIUM,MONGO_AUTHENTICATION_DOC)
+    .define(DB_AUTHENTICATION, ConfigDef.Type.STRING,DB_AUTHENTICATION_DEFAULT, ConfigDef.Importance.MEDIUM,DB_AUTHENTICATION_DOC)
+    .define(DB_AUTHENTICATION_USE_SSL, ConfigDef.Type.BOOLEAN,DB_AUTHENTICATION_USE_SSL_DEFAULT, ConfigDef.Importance.MEDIUM,DB_AUTHENTICATION_USE_SSL_DOC)
     .define(DB_NAME, ConfigDef.Type.STRING,DB_NAME_DEFAULT, ConfigDef.Importance.HIGH,DB_NAME_DOC)
     .define(DB_COLLECTIONS, ConfigDef.Type.LIST,ConfigDef.Importance.HIGH, DB_COLLECTIONS)
     .define(WRITE_BATCH_ENABLED,ConfigDef.Type.BOOLEAN, WRITE_BATCH_ENABLED_DEFAULT,ConfigDef.Importance.MEDIUM, WRITE_BATCH_ENABLED_DOC)

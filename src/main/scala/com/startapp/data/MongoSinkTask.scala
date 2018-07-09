@@ -2,6 +2,7 @@ package com.startapp.data
 
 import java.util
 
+import com.mongodb.MongoClientOptions
 import com.mongodb.casbah.{BulkWriteOperation, query}
 import com.mongodb.casbah.Imports._
 import org.apache.kafka.clients.consumer.OffsetAndMetadata
@@ -31,11 +32,12 @@ class MongoSinkTask extends SinkTask{
     config = MongoSinkConfig(props)
 
     val server = new ServerAddress(config.hostName, config.portNum)
+    val mongoClientOptions = MongoClientOptions.builder().sslEnabled(config.dbAuthUseSsl).build()
     val mongoClient = if(config.dbAuth == null){
-      MongoClient(server)
+      MongoClient(server,mongoClientOptions)
     } else {
       val credentials = MongoCredential.createCredential(config.dbAuth.username, config.dbAuth.source, config.dbAuth.password.toCharArray)
-      MongoClient(server, List(credentials))
+      MongoClient(server, List(credentials),mongoClientOptions)
     }
 
     collections = config.topicToCollection.map(t=> (t._1, mongoClient(config.dbName)(t._2)))
